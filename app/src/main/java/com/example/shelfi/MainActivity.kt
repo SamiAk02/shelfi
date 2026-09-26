@@ -40,6 +40,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.AlertDialog
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -72,7 +73,6 @@ private data class Product(
     // Later, put the matching PNG/JPG in app/src/main/res/drawable/ and set its name here.
     val imageAsset: String? = null
 )
-
 private data class ClassroomPosition(
     val id: String,
     val label: String,
@@ -228,6 +228,15 @@ private fun ShelfiApp(
     var route by remember { mutableStateOf(emptyList<Product>()) }
     var routeStartPosition by remember { mutableStateOf(currentPosition.location) }
     var routeLocationLabel by remember { mutableStateOf(currentPosition.label) }
+    LaunchedEffect(currentPosition) {
+        routeStartPosition = currentPosition.location
+        routeLocationLabel = currentPosition.label
+        if (route.isEmpty() && shoppingList.isNotEmpty()) {
+            route = optimizedRoute(currentPosition.location, shoppingList)
+            focusedRouteIndex = 0
+            routeCompleted = false
+        }
+    }
     val focusedProduct = route.getOrNull(focusedRouteIndex) ?: selectedProduct
     val filteredProducts = products.filter {
         it.name.contains(query.trim(), ignoreCase = true) ||
